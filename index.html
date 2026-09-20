@@ -1,247 +1,1161 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#151006">
-<title>ECTO OS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ECTO-OS // Field Operations</title>
+<link rel="manifest" href='data:application/manifest+json,{"name":"ECTO-OS Field Operations","short_name":"ECTO-OS","display":"standalone","background_color":"#000000","theme_color":"#00ff66","start_url":".","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%23000%22/%3E%3Ctext x=%2250%22 y=%2255%22 font-family=%22monospace%22 font-size=%2218%22 fill=%22%2300ff66%22 text-anchor=%22middle%22%3EE%3C/text%3E%3C/svg%3E","sizes":"any","type":"image/svg+xml"}]}'>
 <style>
 :root{
-  --bg:#090806;--panel:#171208;--panel2:#21180b;--line:#7c5a21;
-  --amber:#ffb52e;--amber2:#ffd36a;--dim:#9d7b3c;--green:#72d66b;
-  --red:#ff5a38;--blue:#4ca7ff;--yellow:#e8d34d;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  --theme:#00ff66;
+  --theme-dim:#00aa44;
+  --theme-glow:rgba(0,255,102,.35);
+  --bg:#050a06;
+  --panel:#0a120c;
+  --line:#1a3a24;
+  --text:#c9ffd9;
+  --muted:#5f8f6d;
+  --danger:#ff4444;
+  --warn:#ffcc00;
+  --awe:#3399ff;
 }
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 50% 0,#2a1c08 0,#0a0805 55%,#050403 100%);color:var(--amber);min-height:100vh}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.08;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 4px)}
-button,input{font:inherit}
-.app{max-width:1100px;margin:auto;padding:18px}
-header{border:1px solid var(--line);background:rgba(20,14,7,.94);padding:18px 20px;margin-bottom:14px;box-shadow:0 0 0 1px #241a0c inset}
-.brand{font-size:clamp(25px,5vw,42px);letter-spacing:.08em}
-.sub{color:var(--dim);font-size:12px;margin-top:5px}
-.status{margin-top:13px;color:var(--green);font-size:12px}
-.screen{border:1px solid var(--line);background:rgba(17,12,6,.96);padding:18px;min-height:520px}
-h1,h2{margin:0 0 16px;letter-spacing:.06em}
-h1{font-size:22px}h2{font-size:15px;color:var(--amber2)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
-.btn{min-height:68px;border:1px solid var(--line);background:linear-gradient(#241909,#130e07);color:var(--amber);padding:14px;text-align:left;cursor:pointer}
-.btn:hover,.btn:focus{outline:1px solid var(--amber);background:#2b1d0a}
-.btn .label{font-size:15px;letter-spacing:.04em}.btn .desc{display:block;color:var(--dim);font-size:11px;margin-top:7px}
-.row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.small{min-height:44px;padding:10px 14px}
-.panel{border:1px solid #4f3918;padding:15px;background:#120d06;margin:12px 0}
-.kv{display:grid;grid-template-columns:180px 1fr;gap:7px;font-size:12px}.kv b{color:var(--dim)}
-input{width:100%;background:#080604;border:1px solid var(--line);color:var(--amber);padding:12px;min-height:44px}
-label{display:block;color:var(--dim);font-size:11px;margin:10px 0 6px}
-.notice{border-left:3px solid var(--amber);padding:10px 12px;background:#21170a;color:var(--amber2);font-size:12px}
-.danger{color:var(--red)}.ok{color:var(--green)}
-footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--dim);font-size:10px;padding:12px 2px}
-.lock{max-width:420px;margin:55px auto}
-.hidden{display:none!important}
-.back{margin-bottom:14px}
-.map{position:relative;height:420px;border:1px solid #4f3918;background:
-linear-gradient(rgba(255,181,46,.06) 1px,transparent 1px),
-linear-gradient(90deg,rgba(255,181,46,.06) 1px,transparent 1px),
-#0b0a08;background-size:32px 32px;overflow:hidden}
-.uk{position:absolute;inset:8% 25% 8% 25%;border:1px solid #7c5a21;clip-path:polygon(38% 0,63% 5%,75% 18%,68% 32%,86% 48%,72% 63%,78% 80%,56% 100%,38% 91%,26% 74%,5% 65%,17% 48%,9% 28%,28% 18%);background:rgba(255,181,46,.035)}
-.marker{position:absolute;transform:translate(-50%,-50%);width:32px;height:32px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 14px currentColor;animation:pulse 1.8s infinite}
-.marker span{position:absolute;top:34px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;color:var(--amber2)}
-@keyframes pulse{50%{box-shadow:0 0 3px currentColor}}
-@media(max-width:600px){.app{padding:10px}.screen{min-height:600px}.kv{grid-template-columns:1fr}.map{height:360px}}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Courier New',ui-monospace,monospace;
+  font-size:14px;
+  -webkit-font-smoothing:none;
+}
+/* CRT scanlines + vignette */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);
+  mix-blend-mode:multiply;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9998;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%);
+}
+.theme-yellow{--theme:#ffcc00;--theme-dim:#aa8800;--theme-glow:rgba(255,204,0,.35);--bg:#0a0805;--panel:#120f08;--line:#3a341a;--text:#fff3c9;--muted:#8f835f}
+.theme-orange{--theme:#ff8800;--theme-dim:#aa5a00;--theme-glow:rgba(255,136,0,.35);--bg:#0a0805;--panel:#120d08;--line:#3a2a1a;--text:#ffe6c9;--muted:#8f6f5f}
+.theme-c64{--theme:#3b6ee8;--theme-dim:#2a4faa;--theme-glow:rgba(59,110,232,.4);--bg:#05070f;--panel:#0a0f1c;--line:#1a2a4a;--text:#c9d9ff;--muted:#5f6f8f}
+
+/* ====== BOOT SCREEN ====== */
+#boot{
+  position:fixed;inset:0;z-index:10000;background:#000;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:24px;
+}
+#boot .bootart{width:min(60vw,420px);image-rendering:pixelated;opacity:.9}
+#boot .boottitle{font-size:34px;letter-spacing:6px;color:var(--theme);text-shadow:0 0 12px var(--theme-glow)}
+#boot .bootsub{color:var(--muted);letter-spacing:3px;font-size:12px}
+#bootbar{width:min(70vw,480px);height:18px;border:1px solid var(--theme);padding:2px}
+#bootbar .fill{height:100%;width:0%;background:var(--theme);box-shadow:0 0 10px var(--theme-glow);transition:width .1s}
+#boot .bootlog{color:var(--muted);font-size:11px;width:min(70vw,480px);min-height:60px;white-space:pre-wrap}
+
+/* ====== LOGIN ====== */
+#login{
+  position:fixed;inset:0;z-index:9000;background:var(--bg);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+}
+#login .card{border:1px solid var(--line);background:var(--panel);padding:32px;width:min(90vw,380px);text-align:center}
+#login input{width:100%;background:#000;border:1px solid var(--line);color:var(--text);padding:10px;font-family:inherit;margin:8px 0;outline:none}
+#login input:focus{border-color:var(--theme);box-shadow:0 0 8px var(--theme-glow)}
+#login .hint{color:var(--muted);font-size:11px;margin-top:10px}
+
+/* ====== LAYOUT ====== */
+#app{display:none;height:100vh}
+#sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:210px;z-index:100;
+  background:var(--panel);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;
+}
+#sidebar .brand{padding:14px;border-bottom:1px solid var(--line);text-align:center}
+#sidebar .brand h1{font-size:16px;letter-spacing:3px;color:var(--theme);text-shadow:0 0 8px var(--theme-glow)}
+#sidebar .brand span{font-size:9px;color:var(--muted);letter-spacing:2px}
+#nav{flex:1;overflow-y:auto;padding:8px 0}
+#nav button{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  background:none;border:none;border-left:3px solid transparent;
+  color:var(--muted);padding:10px 14px;font-family:inherit;font-size:12px;cursor:pointer;
+  letter-spacing:1px;transition:.15s;
+}
+#nav button:hover{color:var(--text);background:rgba(255,255,255,.03)}
+#nav button.active{color:var(--theme);border-left-color:var(--theme);background:rgba(255,255,255,.04);text-shadow:0 0 6px var(--theme-glow)}
+#nav .navicon{width:14px;text-align:center}
+#sidebar .sysfoot{padding:10px;border-top:1px solid var(--line);font-size:9px;color:var(--muted);text-align:center}
+
+#main{margin-left:210px;height:100vh;overflow-y:auto;padding:20px 28px;position:relative}
+#topbar{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:18px}
+#topbar h2{color:var(--theme);letter-spacing:3px;font-size:20px;text-shadow:0 0 8px var(--theme-glow)}
+#topbar .status{font-size:11px;color:var(--muted);text-align:right}
+#topbar .dot{display:inline-block;width:8px;height:8px;background:var(--theme);border-radius:50%;margin-right:6px;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.section{display:none}
+.section.active{display:block;animation:fadein .25s}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+
+/* panels */
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.panel{border:1px solid var(--line);background:var(--panel);padding:16px;position:relative}
+.panel h3{color:var(--theme);font-size:13px;letter-spacing:2px;margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.panel h4{color:var(--text);font-size:11px;letter-spacing:1px;margin-bottom:8px}
+label{display:block;font-size:10px;color:var(--muted);letter-spacing:1px;margin:8px 0 4px}
+input,select,textarea{
+  width:100%;background:#000;border:1px solid var(--line);color:var(--text);
+  padding:8px;font-family:inherit;font-size:12px;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--theme);box-shadow:0 0 8px var(--theme-glow)}
+button.btn{
+  background:var(--theme);color:#000;border:none;padding:9px 14px;font-family:inherit;
+  font-weight:bold;font-size:11px;letter-spacing:1px;cursor:pointer;margin-top:10px;
+}
+button.btn:hover{filter:brightness(1.15)}
+button.btn.ghost{background:transparent;color:var(--theme);border:1px solid var(--theme)}
+button.btn.danger{background:var(--danger);color:#000}
+button.btn.small{padding:5px 9px;font-size:10px;margin:2px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row > *{flex:1;min-width:120px}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{color:var(--theme);text-align:left;padding:8px;border-bottom:1px solid var(--theme);letter-spacing:1px}
+td{padding:8px;border-bottom:1px solid var(--line);color:var(--text)}
+tr:hover td{background:rgba(255,255,255,.03)}
+
+/* threat badges */
+.badge{display:inline-block;padding:2px 8px;font-size:10px;letter-spacing:1px;border:1px solid}
+.badge.green{color:#00ff66;border-color:#00ff66}
+.badge.yellow{color:#ffcc00;border-color:#ffcc00}
+.badge.orange{color:#ff8800;border-color:#ff8800}
+.badge.red{color:#ff4444;border-color:#ff4444}
+.badge.awe{color:#3399ff;border-color:#3399ff}
+
+/* ====== DISPATCH MAP ====== */
+#mapWrap{position:relative;border:1px solid var(--line);background:
+  radial-gradient(circle at 20% 30%,rgba(255,255,255,.03),transparent 40%),
+  radial-gradient(circle at 80% 70%,rgba(255,255,255,.02),transparent 40%),#000;
+  height:560px;overflow:hidden}
+#mapGrid{position:absolute;inset:0;background-image:
+  linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:40px 40px}
+.city{position:absolute;transform:translate(-50%,-50%);cursor:pointer;text-align:center}
+.city .pulse{position:absolute;top:50%;left:50%;width:20px;height:20px;transform:translate(-50%,-50%);border-radius:50%;border:2px solid;opacity:.9;animation:pulse 1.6s infinite}
+.city .pulse::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid;opacity:.5;animation:pulse 1.6s infinite .4s}
+.city .marker{position:relative;width:12px;height:12px;background:var(--c,#00ff66);border-radius:50%;margin:0 auto;box-shadow:0 0 8px var(--c,#00ff66)}
+.city .lbl{position:relative;font-size:10px;letter-spacing:1px;color:var(--c,#00ff66);text-shadow:0 0 4px #000;margin-top:2px}
+.city.safe .pulse{display:none}
+.city.awe .pulse,.city.awe .marker,.city.awe .lbl{--c:#3399ff}
+.city.threat-0{--c:#00ff66}
+.city.threat-1{--c:#ffcc00}
+.city.threat-2{--c:#ff8800}
+.city.threat-3{--c:#ff4444}
+@keyframes pulse{0%{transform:translate(-50%,-50%) scale(.6);opacity:1}100%{transform:translate(-50%,-50%) scale(2.2);opacity:0}}
+#mapLegend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--muted)}
+#mapLegend .sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle}
+
+/* chat */
+#chatLog{height:340px;overflow-y:auto;border:1px solid var(--line);background:#000;padding:10px;font-size:12px}
+.chat-msg{margin-bottom:8px}
+.chat-msg .who{color:var(--theme);font-weight:bold}
+.chat-msg .time{color:var(--muted);font-size:9px}
+.chat-msg.sent .who{color:var(--warn)}
+.chat-msg.sys{color:var(--muted);font-style:italic;text-align:center}
+#chatInput{display:flex;gap:8px;margin-top:8px}
+#chatInput input{flex:1}
+
+/* misc */
+.thumb{width:100%;border:1px solid var(--line);image-rendering:pixelated;display:block}
+.log{background:#000;border:1px solid var(--line);height:200px;overflow-y:auto;padding:10px;font-size:11px;color:var(--theme)}
+.log div{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.log .ok{color:var(--theme)}
+.log .warn{color:var(--warn)}
+.log .fail{color:var(--danger)}
+.meter{margin:10px 0}
+.meter .bar{height:14px;background:#000;border:1px solid var(--line);position:relative}
+.meter .bar i{display:block;height:100%;background:var(--theme);box-shadow:0 0 8px var(--theme-glow);transition:width .4s}
+.meter .cap{font-size:10px;color:var(--muted);margin-top:4px}
+.toast{
+  position:fixed;bottom:20px;right:20px;z-index:10000;background:var(--panel);
+  border:1px solid var(--theme);color:var(--text);padding:12px 18px;font-size:12px;
+  box-shadow:0 0 16px var(--theme-glow);display:none;max-width:320px;
+}
+@media(max-width:900px){
+  #sidebar{width:60px}
+  #sidebar .brand h1,#sidebar .brand span,#nav button span,#sidebar .sysfoot{display:none}
+  #nav button{justify-content:center;padding:12px 0}
+  #main{margin-left:60px;padding:14px}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  #mapWrap{height:420px}
+}
 </style>
 </head>
 <body>
-<div class="app">
-<header>
-  <div class="brand">ECTO OS</div>
-  <div class="sub">FIELD OPERATIONS SYSTEM // FOUNDATION BUILD</div>
-  <div class="status" id="systemStatus">SYSTEM // OPERATIONAL</div>
-</header>
-<main id="screen" class="screen"></main>
-<footer><span>ECTO OS // LOCAL DATABASE</span><span id="saveStatus">DATABASE // READY</span></footer>
+
+<!-- BOOT -->
+<div id="boot">
+  <img class="bootart" id="bootArt" alt="">
+  <div class="boottitle">ECTO-OS</div>
+  <div class="bootsub">FIELD OPERATIONS v2.1</div>
+  <div id="bootbar"><div class="fill" id="bootFill"></div></div>
+  <div class="bootlog" id="bootLog"></div>
 </div>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="card">
+    <h2 style="color:var(--theme);letter-spacing:3px;margin-bottom:8px">ECTO-OS</h2>
+    <p style="color:var(--muted);font-size:11px;margin-bottom:16px">AUTHORIZED PERSONNEL ONLY</p>
+    <input id="loginUser" placeholder="OPERATOR ID" autocomplete="off">
+    <input id="loginPass" type="password" placeholder="ACCESS CODE" autocomplete="off">
+    <button class="btn" id="loginBtn" style="width:100%">BOOT SYSTEM</button>
+    <div class="hint">Default: operator / ecto1984</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand"><h1>ECTO-OS</h1><span>FIELD OPERATIONS</span></div>
+    <nav id="nav"></nav>
+    <div class="sysfoot">SYS v2.1 // LOCAL NET<br><span id="clock"></span></div>
+  </aside>
+  <main id="main">
+    <div id="topbar">
+      <h2 id="pageTitle">DISPATCH MAP</h2>
+      <div class="status"><span class="dot"></span>ONLINE<br><span id="opName">OPERATOR</span></div>
+    </div>
+
+    <!-- DISPATCH MAP -->
+    <section class="section active" id="sec-dispatch">
+      <div class="grid grid-2">
+        <div class="panel" style="grid-column:1/-1">
+          <h3>DISPATCH MAP // THREAT OVERVIEW</h3>
+          <div id="mapWrap">
+            <div id="mapGrid"></div>
+            <div id="mapCities"></div>
+          </div>
+          <div id="mapLegend">
+            <span><span class="sw" style="background:#00ff66"></span>NOMINAL</span>
+            <span><span class="sw" style="background:#ffcc00"></span>ELEVATED</span>
+            <span><span class="sw" style="background:#ff8800"></span>HIGH</span>
+            <span><span class="sw" style="background:#ff4444"></span>CRITICAL</span>
+            <span><span class="sw" style="background:#3399ff"></span>ALTERED WORLD EVENT</span>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>CITY CASE CONTROL</h3>
+          <label>SELECT CITY</label>
+          <select id="mapCitySel"></select>
+          <label>THREAT LEVEL</label>
+          <select id="mapThreat">
+            <option value="0">NOMINAL (GREEN)</option>
+            <option value="1">ELEVATED (YELLOW)</option>
+            <option value="2">HIGH (ORANGE)</option>
+            <option value="3">CRITICAL (RED)</option>
+            <option value="awe">ALTERED WORLD EVENT (BLUE)</option>
+          </select>
+          <label>CASE REFERENCE</label>
+          <input id="mapCaseRef" placeholder="e.g. CASE-2026-014">
+          <button class="btn" id="mapApply">APPLY TO MAP</button>
+          <button class="btn ghost" id="mapClear">CLEAR CASE</button>
+        </div>
+        <div class="panel">
+          <h3>GLOBAL THREAT SUMMARY</h3>
+          <div id="threatSummary" style="font-size:12px;line-height:2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOCATION DATA -->
+    <section class="section" id="sec-location">
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>LOCATION DATA // REGISTERED CITIES</h3>
+          <table id="cityTable"><thead><tr><th>CITY</th><th>REGION</th><th>STATUS</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="panel">
+          <h3>ADD CITY</h3>
+          <label>CITY NAME</label><input id="cityName">
+          <label>REGION</label><input id="cityRegion">
+          <label>MAP POSITION (X %)</label><input id="cityX" type="number" value="50" min="5" max="95">
+          <label>MAP POSITION (Y %)</label><input id="cityY" type="number" value="50" min="5" max="95">
+          <button class="btn" id="cityAdd">REGISTER CITY</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- INVESTIGATION SITES -->
+    <section class="section" id="sec-sites">
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>INVESTIGATION SITES</h3>
+          <table id="siteTable"><thead><tr><th>SITE</th><th>CITY</th><th>STATUS</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="panel">
+          <h3>REGISTER SITE</h3>
+          <label>SITE NAME</label><input id="siteName">
+          <label>CITY</label><select id="siteCity"></select>
+          <label>STATUS</label>
+          <select id="siteStatus"><option>ACTIVE</option><option>STANDBY</option><option>CLOSED</option></select>
+          <button class="btn" id="siteAdd">REGISTER SITE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESPONSE TEAMS -->
+    <section class="section" id="sec-teams">
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>RESPONSE TEAMS</h3>
+          <table id="teamTable"><thead><tr><th>TEAM</th><th>LEAD</th><th>VEHICLE</th><th>STATUS</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="panel">
+          <h3>NEW TEAM</h3>
+          <label>TEAM DESIGNATION</label><input id="teamName" placeholder="e.g. ALPHA">
+          <label>TEAM LEAD</label><input id="teamLead" placeholder="e.g. SPENGLER">
+          <label>ASSIGNED VEHICLE</label><select id="teamVehicle"></select>
+          <label>STATUS</label>
+          <select id="teamStatus"><option>READY</option><option>DEPLOYED</option><option>RECALLED</option><option>DOWN</option></select>
+          <button class="btn" id="teamAdd">FORM TEAM</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VEHICLE MASTER -->
+    <section class="section" id="sec-vehicles">
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>VEHICLE MASTER RECORDS</h3>
+          <table id="vehicleTable"><thead><tr><th>REG</th><th>TYPE</th><th>STATUS</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="panel">
+          <h3>REGISTER VEHICLE</h3>
+          <label>REGISTRATION</label><input id="vehReg" placeholder="e.g. ECTO-1">
+          <label>TYPE</label>
+          <select id="vehType"><option>ECT0-1 CADILLAC</option><option>ECT0-2 UTILITY</option><option>ECT0-3 UTILITY</option><option>ECT0-4 UTILITY</option><option>SUPPORT VAN</option></select>
+          <label>STATUS</label>
+          <select id="vehStatus"><option>OPERATIONAL</option><option>MAINTENANCE</option><option>OUT OF SERVICE</option></select>
+          <button class="btn" id="vehAdd">REGISTER VEHICLE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM EDITOR -->
+    <section class="section" id="sec-editor">
+      <div class="panel">
+        <h3>TEAM EDITOR // MEMBERSHIP</h3>
+        <div class="grid grid-2">
+          <div>
+            <label>SELECT TEAM</label><select id="editTeamSel"></select>
+            <label>MEMBER NAME</label><input id="memberName" placeholder="e.g. STANTZ">
+            <label>ROLE</label><input id="memberRole" placeholder="e.g. ENGINEER">
+            <button class="btn" id="memberAdd">ADD MEMBER</button>
+          </div>
+          <div>
+            <h4>TEAM ROSTER</h4>
+            <table id="memberTable"><thead><tr><th>NAME</th><th>ROLE</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRE-FLIGHT -->
+    <section class="section" id="sec-preflight">
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>PRE-FLIGHT CHECKLIST</h3>
+          <div id="preflightList"></div>
+        </div>
+        <div class="panel">
+          <h3>VEHICLE SYSTEMS</h3>
+          <div id="preflightMeters"></div>
+          <button class="btn" id="preflightRun">RUN PRE-FLIGHT</button>
+          <button class="btn ghost" id="preflightReset">RESET</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGNOSTICS -->
+    <section class="section" id="sec-diag">
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>SYSTEM DIAGNOSTICS</h3>
+          <div id="diagList"></div>
+          <button class="btn" id="diagRun">RUN DIAGNOSTICS</button>
+        </div>
+        <div class="panel">
+          <h3>EVENT LOG</h3>
+          <div class="log" id="diagLog"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPECTRE DATABASE -->
+    <section class="section" id="sec-spectre">
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>SPECTRE DATABASE</h3>
+          <table id="spectreTable"><thead><tr><th>CLASS</th><th>DESIGNATION</th><th>THREAT</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="panel">
+          <h3>LOG SPECTRE</h3>
+          <label>CLASSIFICATION</label><input id="specClass" placeholder="e.g. CLASS V">
+          <label>DESIGNATION</label><input id="specName" placeholder="e.g. THE STAY PUFT MARSHMALLOW MAN">
+          <label>THREAT</label>
+          <select id="specThreat"><option value="0">LOW</option><option value="1">MODERATE</option><option value="2">HIGH</option><option value="3">CRITICAL</option></select>
+          <button class="btn" id="specAdd">LOG SPECTRE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- INCIDENT DATABASE -->
+    <section class="section" id="sec-incident">
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>INCIDENT DATABASE</h3>
+          <table id="incidentTable"><thead><tr><th>REF</th><th>CITY</th><th>THREAT</th><th>STATUS</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="panel">
+          <h3>FILE INCIDENT</h3>
+          <label>CASE REFERENCE</label><input id="incRef" placeholder="CASE-2026-014">
+          <label>CITY</label><select id="incCity"></select>
+          <label>THREAT</label>
+          <select id="incThreat">
+            <option value="0">GREEN</option><option value="1">YELLOW</option>
+            <option value="2">ORANGE</option><option value="3">RED</option><option value="awe">AWE (BLUE)</option>
+          </select>
+          <label>STATUS</label>
+          <select id="incStatus"><option>OPEN</option><option>IN PROGRESS</option><option>CONTAINED</option><option>RESOLVED</option></select>
+          <button class="btn" id="incAdd">FILE INCIDENT</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTAINMENT GRID -->
+    <section class="section" id="sec-contain">
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>CONTAINMENT GRID</h3>
+          <div id="containGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+        </div>
+        <div class="panel">
+          <h3>GRID CONTROL</h3>
+          <div id="containInfo" style="font-size:12px;line-height:1.8"></div>
+          <button class="btn" id="containCycle">CYCLE CELL STATUS</button>
+          <button class="btn ghost" id="containReset">RESET GRID</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM COMMUNICATIONS -->
+    <section class="section" id="sec-comm">
+      <div class="grid grid-2">
+        <div class="panel" style="grid-column:1/-1">
+          <h3>TEAM COMMUNICATIONS // COMMS CHANNEL</h3>
+          <div id="chatLog"></div>
+          <div id="chatInput">
+            <input id="chatText" placeholder="ISSUE ORDER... e.g. ALPHA TEAM, PROCEED TO CASE-2026-014">
+            <button class="btn" id="chatSend">SEND</button>
+            <button class="btn ghost" id="chatClear">CLEAR</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOUNDS -->
+    <section class="section" id="sec-sound">
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>AUDIO ENGINE</h3>
+          <label>SCANNING HUM VOLUME</label>
+          <input type="range" id="humVol" min="0" max="1" step=".05" value=".3">
+          <label>UI BLIPS</label>
+          <select id="blipToggle"><option value="1">ENABLED</option><option value="0">MUTED</option></select>
+          <label>HEART-MONITOR SCAN</label>
+          <select id="scanMode"><option value="steady">STEADY HUM</option><option value="heart">HEART MONITOR</option></select>
+          <button class="btn" id="soundTest">TEST AUDIO</button>
+          <button class="btn ghost" id="soundStop">SILENCE</button>
+        </div>
+        <div class="panel">
+          <h3>SOUND ENGINE NOTES</h3>
+          <p style="font-size:11px;line-height:1.8;color:var(--muted)">
+            All audio is synthesized via Web Audio API — no external files.<br><br>
+            The scanning hum dynamically reflects the highest active threat level on the Dispatch Map. Higher threat = higher pitch and faster pulse.<br><br>
+            Heart-monitor mode adds a pulsing "beep" cadence that accelerates with threat intensity.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOADING ART -->
+    <section class="section" id="sec-loading">
+      <div class="panel">
+        <h3>LOADING SCREEN ARTWORK</h3>
+        <img id="loadingArt" class="thumb" alt="Loading screen artwork">
+        <p style="font-size:11px;color:var(--muted);margin-top:10px">
+          This artwork displays during system boot. Replace the embedded image below (see <code>BOOT_ART_SVG</code> in the code) to customize.
+        </p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-(() => {
-"use strict";
+/* =====================================================================
+   ECTO-OS FIELD OPERATIONS — single-file PWA
+   Sections: Boot, Login, Dispatch Map, Location, Sites, Teams, Vehicles,
+   Team Editor, Pre-Flight, Diagnostics, Spectre DB, Incident DB,
+   Containment Grid, Communications, Sounds, Loading Art.
+   Themes: green / yellow / orange / C64 blue.
+   Persistence: localStorage + JSON export/import.
+================================================================ */
 
-const STORAGE_KEY = "ecto-os-foundation-v1";
-const ADMIN_KEY = "ecto-os-admin-v1";
-const DEFAULT_PASS = "ECTO-ADMIN-1984";
+/* ---------- BOOT ART (embedded SVG) ---------- */
+const BOOT_ART_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#000"/>
+<rect x="40" y="40" width="320" height="220" fill="none" stroke="#00ff66" stroke-width="2"/>
+<rect x="50" y="50" width="300" height="200" fill="none" stroke="#00ff66" stroke-width="1" opacity=".4"/>
+<text x="200" y="120" font-family="monospace" font-size="40" fill="#00ff66" text-anchor="middle">ECTO-OS</text>
+<text x="200" y="155" font-family="monospace" font-size="14" fill="#00ff66" opacity=".8" text-anchor="middle">FIELD OPERATIONS v2.1</text>
+<circle cx="200" cy="200" r="30" fill="none" stroke="#00ff66" stroke-width="2" opacity=".6"/>
+<circle cx="200" cy="200" r="10" fill="#00ff66" opacity=".8"/>
+<text x="200" y="245" font-family="monospace" font-size="10" fill="#00ff66" opacity=".5" text-anchor="middle">[ NO GHOST IS TOO BIG ]</text>
+</svg>`;
 
-const defaults = {
-  version: 1,
-  locations: [
-    {id:"LON-01", city:"London", severity:"green", lat:51.5074, lon:-0.1278, sites:[]},
-    {id:"POR-01", city:"Portsmouth", severity:"yellow", lat:50.8198, lon:-1.0880, sites:[]},
-    {id:"BHM-01", city:"Birmingham", severity:"green", lat:52.4862, lon:-1.8904, sites:[]},
-    {id:"MAN-01", city:"Manchester", severity:"orange", lat:53.4808, lon:-2.2426, sites:[]}
-  ],
-  teams: [],
-  vehicles: [],
-  spectres: [],
-  incidents: [],
-  awe: []
+/* ---------- THEME SELECTOR ---------- */
+const THEMES = [
+  {id:'green', label:'PKE GREEN', cls:''},
+  {id:'yellow', label:'CAUTION YELLOW', cls:'theme-yellow'},
+  {id:'orange', label:'THREAT ORANGE', cls:'theme-orange'},
+  {id:'c64', label:'C64 BLUE', cls:'theme-c64'}
+];
+
+/* ---------- DEFAULT DATA ---------- */
+const DEFAULT_CITIES = [
+  {name:'NEW YORK', region:'NE', x:78, y:38, threat:0},
+  {name:'BOSTON', region:'NE', x:72, y:28, threat:0},
+  {name:'CHICAGO', region:'MW', x:52, y:42, threat:1},
+  {name:'DALLAS', region:'SW', x:38, y:62, threat:0},
+  {name:'DENVER', region:'MW', x:26, y:48, threat:0},
+  {name:'LOS ANGELES', region:'SW', x:12, y:55, threat:0},
+  {name:'SEATTLE', region:'NW', x:14, y:18, threat:0},
+  {name:'MIAMI', region:'SE', x:82, y:72, threat:0},
+  {name:'ATLANTA', region:'SE', x:70, y:60, threat:2},
+  {name:'PHOENIX', region:'SW', x:20, y:60, threat:0},
+  {name:'NEW ORLEANS', region:'SE', x:48, y:68, threat:0},
+  {name:'WASHINGTON DC', region:'NE', x:76, y:48, threat:0}
+];
+
+const DEFAULT_VEHICLES = [
+  {reg:'ECTO-1', type:'ECT0-1 CADILLAC', status:'OPERATIONAL'},
+  {reg:'ECTO-2', type:'ECT0-2 UTILITY', status:'OPERATIONAL'},
+  {reg:'ECTO-3', type:'ECT0-3 UTILITY', status:'MAINTENANCE'}
+];
+
+const DEFAULT_TEAMS = [
+  {name:'ALPHA', lead:'SPENGLER', vehicle:'ECTO-1', status:'READY', members:[{name:'VENKMAN', role:'LEAD SCIENTIST'},{name:'RAY', role:'ENGINEER'}]},
+  {name:'BRAVO', lead:'STANTZ', vehicle:'ECTO-2', status:'STANDBY', members:[{name:'WINSTON', role:'FIELD TECH'}]}
+];
+
+const DEFAULT_SITES = [
+  {name:'FIREHOUSE HQ', city:'NEW YORK', status:'ACTIVE'},
+  {name:'SEDGWICK HOTEL', city:'NEW YORK', status:'CLOSED'},
+  {name:'MUSEUM OF ART', city:'CHICAGO', status:'STANDBY'}
+];
+
+const DEFAULT_SPECTRES = [
+  {cls:'CLASS V', name:'THE STAY PUFT MARSHMALLOW MAN', threat:3},
+  {cls:'CLASS IV', name:'SLIMER', threat:1},
+  {cls:'CLASS VI', name:'THE GATEKEEPER', threat:3}
+];
+
+const DEFAULT_INCIDENTS = [
+  {ref:'CASE-2026-011', city:'CHICAGO', threat:1, status:'IN PROGRESS'},
+  {ref:'CASE-2026-012', city:'ATLANTA', threat:2, status:'OPEN'},
+  {ref:'CASE-2026-013', city:'NEW YORK', threat:0, status:'RESOLVED'}
+];
+
+const DEFAULT_CHAT = [
+  {who:'SYS', text:'COMMS CHANNEL OPEN. ALL TEAMS REPORT.', time:null, sys:true},
+  {who:'DISPATCH', text:'ALPHA TEAM — STAND BY FOR ASSIGNMENT.', time:null, sys:true}
+];
+
+const DEFAULT_CONTAIN = Array.from({length:16},(_,i)=>({id:i+1, status:0}));
+
+const DEFAULT_PREFLIGHT = [
+  {name:'PROTON PACK CHARGE', ok:true},
+  {name:'TRACTOR BEAM', ok:true},
+  {name:'PARTICLE THROWER', ok:true},
+  {name:'GHOST TRAP SEALS', ok:true},
+  {name:'COMMS LINK', ok:true},
+  {name:'NAV SYSTEM', ok:true},
+  {name:'CONTAINMENT FEED', ok:true},
+  {name:'PKE METER CALIBRATION', ok:true}
+];
+
+const DEFAULT_DIAG = [
+  {name:'CPU', status:'OK'},
+  {name:'MEMORY BANK A', status:'OK'},
+  {name:'MEMORY BANK B', status:'OK'},
+  {name:'I/O BUS', status:'OK'},
+  {name:'POWER SUPPLY', status:'OK'},
+  {name:'SENSOR ARRAY', status:'OK'},
+  {name:'COMMS MODULE', status:'OK'}
+];
+
+/* ---------- STATE ---------- */
+let state = {
+  settings:{theme:'green', humVol:.3, blip:true, scanMode:'steady'},
+  cities:JSON.parse(JSON.stringify(DEFAULT_CITIES)),
+  vehicles:JSON.parse(JSON.stringify(DEFAULT_VEHICLES)),
+  teams:JSON.parse(JSON.stringify(DEFAULT_TEAMS)),
+  sites:JSON.parse(JSON.stringify(DEFAULT_SITES)),
+  spectres:JSON.parse(JSON.stringify(DEFAULT_SPECTRES)),
+  incidents:JSON.parse(JSON.stringify(DEFAULT_INCIDENTS)),
+  chat:JSON.parse(JSON.stringify(DEFAULT_CHAT)),
+  contain:JSON.parse(JSON.stringify(DEFAULT_CONTAIN)),
+  preflight:JSON.parse(JSON.stringify(DEFAULT_PREFLIGHT)),
+  diag:JSON.parse(JSON.stringify(DEFAULT_DIAG)),
+  operator:'OPERATOR'
 };
 
-let state = loadState();
-let current = "home";
-let adminUnlocked = false;
+const SAVE_KEY = 'ecto-os-state-v2';
 
-function clone(o){return JSON.parse(JSON.stringify(o))}
-function loadState(){
+/* ---------- HELPERS ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.style.display='block';
+  clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',2600);
+}
+function nowStr(){
+  const d=new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+}
+function save(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }
+  catch(e){ toast('SAVE FAILED: STORAGE FULL'); }
+}
+function load(){
   try{
-    const raw=localStorage.getItem(STORAGE_KEY);
-    if(raw) return {...clone(defaults),...JSON.parse(raw)};
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(raw){ const s=JSON.parse(raw); state=Object.assign(state,s); }
   }catch(e){}
-  return clone(defaults);
 }
-function saveState(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  document.getElementById("saveStatus").textContent="DATABASE // SAVED "+new Date().toLocaleTimeString();
-}
-function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-function screen(html){document.getElementById("screen").innerHTML=html}
-function nav(name){current=name; render()}
-function adminGate(next){
-  if(adminUnlocked){nav(next);return}
-  current="lock"; render();
-}
-function render(){
-  if(current==="home") return home();
-  if(current==="response") return responseMap();
-  if(current==="config") return config();
-  if(current==="locations") return locations();
-  if(current==="teams") return teams();
-  if(current==="vehicles") return vehicles();
-  if(current==="data") return dataManagement();
-  if(current==="lock") return lockScreen();
-  if(current==="placeholder") return placeholder();
-  home();
-}
-function home(){
-screen(`<h1>MAIN MENU</h1>
-<div class="grid">
-${menuBtn("RESPONSE MAP","Live operational city response overview","response")}
-${menuBtn("ECTO DISPATCH","Response deployment and investigation workflow","placeholder")}
-${menuBtn("SPECTRE DATABASE","Spectre records and CDI classification","placeholder")}
-${menuBtn("INCIDENT LOG","Investigation and AWE records","placeholder")}
-${menuBtn("CONTAINMENT GRID","Grid analysis and field simulation","placeholder")}
-${menuBtn("DIAGNOSTICS","System and equipment diagnostics","placeholder")}
-${menuBtn("CONFIGURATION","Administrator system configuration","config",true)}
-</div>
-<div class="panel"><div class="kv">
-<b>SYSTEM STATUS</b><span class="ok">OPERATIONAL</span>
-<b>DATABASE</b><span>LOCAL // PERSISTENT</span>
-<b>LOCATIONS</b><span>${state.locations.length}</span>
-<b>RESPONSE TEAMS</b><span>${state.teams.length}</span>
-<b>VEHICLES</b><span>${state.vehicles.length}</span>
-</div></div>`)
-}
-function menuBtn(label,desc,target,protectedItem=false){
-return `<button class="btn" data-nav="${target}" ${protectedItem?'data-protected="1"':''}><span class="label">${label}</span><span class="desc">${desc}${protectedItem?' // ADMIN':''}</span></button>`
-}
-function responseMap(){
-let marks=state.locations.map((l,i)=>{
-let x=25+((l.lon+8)/14)*50; let y=12+((56-l.lat)/7)*76;
-x=Math.max(8,Math.min(92,x));y=Math.max(8,Math.min(92,y));
-return `<button class="marker" style="left:${x}%;top:${y}%;color:var(--${l.severity==='green'?'green':l.severity==='yellow'?'yellow':l.severity==='orange'?'amber':l.severity==='red'?'red':'blue'})" data-location="${escapeHtml(l.id)}" title="${escapeHtml(l.city)}"><span>${escapeHtml(l.city)}</span></button>`
-}).join("");
-screen(`<button class="btn small back" data-nav="home">← MAIN MENU</button>
-<h1>RESPONSE MAP</h1>
-<div class="notice">Operational response overview. Select a city reticle to inspect its investigation locations.</div>
-<div class="map"><div class="uk"></div>${marks}</div>
-<div class="panel"><h2>RETICLE STATUS</h2>
-<div class="kv"><b>GREEN</b><span>Routine</span><b>YELLOW</b><span>Elevated</span><b>ORANGE</b><span>Serious</span><b>RED</b><span>Critical</span><b>BLUE</b><span>Altered World Event</span></div></div>`)
-}
-function config(){
-screen(`<button class="btn small back" data-nav="home">← MAIN MENU</button>
-<h1>CONFIGURATION</h1>
-<div class="grid">
-${menuBtn("LOCATION MANAGEMENT","Cities and investigation locations","locations")}
-${menuBtn("RESPONSE TEAM MANAGEMENT","Teams, members and assigned vehicles","teams")}
-${menuBtn("VEHICLE FLEET","Master vehicle records","vehicles")}
-${menuBtn("DATA MANAGEMENT","Protected import and export","data")}
-</div>
-<div class="panel"><div class="notice">Administrator access active. Configuration changes are written to the local database automatically.</div></div>`)
-}
-function locations(){
-screen(`<button class="btn small back" data-nav="config">← CONFIGURATION</button><h1>LOCATION MANAGEMENT</h1>
-<div class="panel"><h2>CITIES</h2>${state.locations.map(l=>`<div class="row"><button class="btn small" data-edit-location="${l.id}">${escapeHtml(l.city)} // ${l.id}</button></div>`).join("")||"No locations."}</div>
-<div class="panel"><h2>ADD CITY</h2><label>City name</label><input id="newCity" placeholder="City name"><div class="row"><button class="btn small" data-add-city="1">ADD LOCATION</button></div></div>`)
-}
-function teams(){
-screen(`<button class="btn small back" data-nav="config">← CONFIGURATION</button><h1>RESPONSE TEAM MANAGEMENT</h1>
-<div class="panel"><h2>TEAMS</h2>${state.teams.map(t=>`<div class="row"><button class="btn small" data-edit-team="${t.id}">${escapeHtml(t.name)} // ${escapeHtml(t.vehicleId||"NO VEHICLE")}</button></div>`).join("")||"No response teams."}</div>
-<div class="panel"><h2>ADD TEAM</h2><label>Team name</label><input id="newTeam" placeholder="Team Alpha"><div class="row"><button class="btn small" data-add-team="1">ADD TEAM</button></div></div>`)
-}
-function vehicles(){
-screen(`<button class="btn small back" data-nav="config">← CONFIGURATION</button><h1>VEHICLE FLEET</h1>
-<div class="panel"><h2>MASTER VEHICLE RECORDS</h2>${state.vehicles.map(v=>`<div class="row"><button class="btn small" data-edit-vehicle="${v.id}">${escapeHtml(v.designation)} // ${escapeHtml(v.role)}</button></div>`).join("")||"No vehicles."}</div>
-<div class="panel"><h2>ADD VEHICLE</h2><label>Designation</label><input id="newVehicle" placeholder="ECTO 19"><label>Role</label><input id="newRole" placeholder="Mobile containment"><div class="row"><button class="btn small" data-add-vehicle="1">ADD VEHICLE</button></div></div>`)
-}
-function dataManagement(){
-screen(`<button class="btn small back" data-nav="config">← CONFIGURATION</button><h1>DATA MANAGEMENT</h1>
-<div class="notice">IMPORT AND EXPORT ARE ADMINISTRATOR PROTECTED.</div>
-<div class="grid" style="margin-top:15px">
-<button class="btn" data-export="1"><span class="label">EXPORT ECTO DATA</span><span class="desc">Create a complete local database backup</span></button>
-<button class="btn" data-import="1"><span class="label">IMPORT ECTO DATA</span><span class="desc">Restore a previously exported database</span></button>
-</div>
-<div class="panel"><div class="kv"><b>DATABASE</b><span>ECTO OS LOCAL DATABASE v${state.version}</span><b>LAST SAVE</b><span>${new Date().toLocaleString()}</span></div></div>`)
-}
-function lockScreen(){
-screen(`<div class="lock"><h1>ADMINISTRATOR ACCESS</h1>
-<div class="notice">Configuration and data management are protected.</div>
-<label>ADMIN PASSCODE</label><input id="adminPass" type="password" autocomplete="current-password" placeholder="Enter passcode">
-<div class="row"><button class="btn small" data-unlock="1">UNLOCK SYSTEM</button><button class="btn small" data-nav="home">CANCEL</button></div>
-<div id="lockMsg" class="danger"></div></div>`)
-}
-function placeholder(){
-screen(`<button class="btn small back" data-nav="home">← MAIN MENU</button><h1>SYSTEM MODULE</h1>
-<div class="panel"><div class="notice">MODULE NOT YET INITIALISED</div><p style="color:var(--dim)">This foundation build reserves the module and navigation point. Operational functionality will be added without changing the core database architecture.</p></div>`)
+function threatClass(t){ return t==='awe' ? 'awe' : 'threat-'+t; }
+function threatBadge(t){
+  const map={0:['green','NOMINAL'],1:['yellow','ELEVATED'],2:['orange','HIGH'],3:['red','CRITICAL'],awe:['awe','AWE']};
+  const [c,l]=map[t]||map[0];
+  return `<span class="badge ${c}">${l}</span>`;
 }
 
-document.addEventListener("click",e=>{
-const b=e.target.closest("button"); if(!b)return;
-if(b.dataset.nav){
-  if(b.dataset.protected) adminGate(b.dataset.nav); else nav(b.dataset.nav); return;
+/* ---------- NAVIGATION ---------- */
+const NAV_ITEMS = [
+  {id:'dispatch', icon:'◉', label:'DISPATCH MAP'},
+  {id:'location', icon:'⌖', label:'LOCATION DATA'},
+  {id:'sites', icon:'▣', label:'INVESTIGATION SITES'},
+  {id:'teams', icon:'▤', label:'RESPONSE TEAMS'},
+  {id:'vehicles', icon:'▦', label:'VEHICLE MASTERS'},
+  {id:'editor', icon:'✎', label:'TEAM EDITOR'},
+  {id:'preflight', icon:'✈', label:'PRE-FLIGHT'},
+  {id:'diag', icon:'⚙', label:'DIAGNOSTICS'},
+  {id:'spectre', icon:'☄', label:'SPECTRE DB'},
+  {id:'incident', icon:'⚠', label:'INCIDENT DB'},
+  {id:'contain', icon:'▧', label:'CONTAINMENT GRID'},
+  {id:'comm', icon:'☏', label:'COMMS'},
+  {id:'sound', icon:'♪', label:'SOUNDS'},
+  {id:'loading', icon:'▨', label:'LOADING ART'}
+];
+const PAGE_TITLES = Object.fromEntries(NAV_ITEMS.map(i=>[i.id,i.label]));
+
+function buildNav(){
+  const nav=$('nav');
+  nav.innerHTML = NAV_ITEMS.map(i=>`<button data-sec="${i.id}"><span class="navicon">${i.icon}</span><span>${i.label}</span></button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>{
+    b.onclick=()=>showSection(b.dataset.sec);
+  });
 }
-if(b.dataset.location){alert("Investigation Location file for "+b.dataset.location+" will be connected here.");return}
-if(b.dataset.unlock){
- const p=document.getElementById("adminPass").value;
- const saved=localStorage.getItem(ADMIN_KEY);
- if(p && (p===saved || (!saved && p===DEFAULT_PASS))){
-   if(!saved) localStorage.setItem(ADMIN_KEY,p);
-   adminUnlocked=true; nav("config");
- } else document.getElementById("lockMsg").textContent="ACCESS DENIED // INVALID PASSCODE";
- return;
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active', b.dataset.sec===id));
+  $('sec-'+id).classList.add('active');
+  $('pageTitle').textContent = PAGE_TITLES[id];
+  blip();
 }
-if(b.dataset.addCity){
- const v=document.getElementById("newCity").value.trim(); if(!v)return;
- const id="LOC-"+Date.now(); state.locations.push({id,city:v,severity:"green",lat:51.5,lon:-1,sites:[]});saveState();render();return;
+
+/* ---------- THEME ---------- */
+function applyTheme(){
+  document.body.className = THEMES.find(t=>t.id===state.settings.theme)?.cls || '';
+  // update CSS vars for theme color
+  const map={
+    green:['#00ff66','#00aa44','rgba(0,255,102,.35)','#050a06','#0a120c','#1a3a24','#c9ffd9','#5f8f6d'],
+    yellow:['#ffcc00','#aa8800','rgba(255,204,0,.35)','#0a0805','#120f08','#3a341a','#fff3c9','#8f835f'],
+    orange:['#ff8800','#aa5a00','rgba(255,136,0,.35)','#0a0805','#120d08','#3a2a1a','#ffe6c9','#8f6f5f'],
+    c64:['#3b6ee8','#2a4faa','rgba(59,110,232,.4)','#05070f','#0a0f1c','#1a2a4a','#c9d9ff','#5f6f8f']
+  };
+  const c=map[state.settings.theme];
+  const r=document.documentElement.style;
+  r.setProperty('--theme',c[0]); r.setProperty('--theme-dim',c[1]);
+  r.setProperty('--theme-glow',c[2]); r.setProperty('--bg',c[3]);
+  r.setProperty('--panel',c[4]); r.setProperty('--line',c[5]);
+  r.setProperty('--text',c[6]); r.setProperty('--muted',c[7]);
 }
-if(b.dataset.addTeam){
- const v=document.getElementById("newTeam").value.trim(); if(!v)return;
- state.teams.push({id:"TEAM-"+Date.now(),name:v,members:[],vehicleId:null});saveState();render();return;
+
+/* ---------- AUDIO ENGINE (synthesized) ---------- */
+let audioCtx=null, humOsc=null, humGain=null, humLFO=null, heartTimer=null;
+function initAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    humOsc = audioCtx.createOscillator();
+    humGain = audioCtx.createGain();
+    humLFO = audioCtx.createOscillator();
+    const lfoGain = audioCtx.createGain();
+    humOsc.type='sawtooth';
+    humOsc.frequency.value=55;
+    humGain.gain.value=0;
+    humLFO.type='sine';
+    humLFO.frequency.value=2;
+    lfoGain.gain.value=8;
+    humLFO.connect(lfoGain); lfoGain.connect(humOsc.frequency);
+    humOsc.connect(humGain); humGain.connect(audioCtx.destination);
+    humOsc.start(); humLFO.start();
+  }
+  if(audioCtx.state==='suspended') audioCtx.resume();
 }
-if(b.dataset.addVehicle){
- const d=document.getElementById("newVehicle").value.trim(),r=document.getElementById("newRole").value.trim(); if(!d)return;
- state.vehicles.push({id:"VEH-"+Date.now(),designation:d,role:r||"Unassigned"});saveState();render();return;
+function setHum(on){
+  if(!audioCtx||!humGain) return;
+  if(!on){ humGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime+.3); return; }
+  const threat = maxThreat();
+  const base = threat==='awe' ? 90 : 55 + (threat*25);
+  humOsc.frequency.setTargetAtTime(base, audioCtx.currentTime, .2);
+  humGain.gain.setTargetAtTime(state.settings.humVol, audioCtx.currentTime, .3);
+  humLFO.frequency.setTargetAtTime(state.settings.scanMode==='heart' ? (1+threat*.8) : 2, audioCtx.currentTime, .2);
+  // heart monitor beeps
+  clearInterval(heartTimer);
+  if(state.settings.scanMode==='heart'){
+    heartTimer=setInterval(()=>{
+      if(!humGain || humGain.gain.value<.01) return;
+      const b=audioCtx.createOscillator(), bg=audioCtx.createGain();
+      b.type='sine'; b.frequency.value=880;
+      bg.gain.setValueAtTime(.15, audioCtx.currentTime);
+      bg.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+.12);
+      b.connect(bg); bg.connect(audioCtx.destination);
+      b.start(); b.stop(audioCtx.currentTime+.15);
+    }, 600/(1+threat*.5));
+  }
 }
-if(b.dataset.editLocation){alert("Location editor reserved for the next foundation phase.");return}
-if(b.dataset.editTeam){alert("Team editor reserved for the next foundation phase.");return}
-if(b.dataset.editVehicle){alert("Vehicle editor reserved for the next foundation phase.");return}
-if(b.dataset.export){
- const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
- const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ecto-os-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);return;
+function blip(){
+  if(!state.settings.blip || !audioCtx) return;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='square'; o.frequency.value=1200;
+  g.gain.setValueAtTime(.06, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+.06);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime+.07);
 }
-if(b.dataset.import){
- const input=document.createElement("input");input.type="file";input.accept=".json,application/json";
- input.onchange=()=>{const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const incoming=JSON.parse(r.result);if(!incoming || incoming.version!==1)throw Error();state=incoming;saveState();alert("ECTO OS DATA IMPORTED");render()}catch(e){alert("IMPORT FAILED // INVALID ECTO DATA")}};r.readAsText(f)};input.click();return;
+function maxThreat(){
+  let m=0;
+  state.cities.forEach(c=>{ if(c.threat==='awe'){ m=Math.max(m,3); } else { m=Math.max(m,Number(c.threat)||0); } });
+  return m;
 }
+
+/* ---------- DISPATCH MAP ---------- */
+function renderMap(){
+  const wrap=$('mapCities'); wrap.innerHTML='';
+  state.cities.forEach(c=>{
+    const el=document.createElement('div');
+    el.className='city '+(c.threat==='awe'?'awe':'threat-'+(c.threat||0))+(c.threat===0?' safe':'');
+    el.style.left=c.x+'%'; el.style.top=c.y+'%';
+    el.innerHTML=`<div class="pulse"></div><div class="marker"></div><div class="lbl">${esc(c.name)}</div>`;
+    el.title=`${c.name} — ${c.threat==='awe'?'AWE':['NOMINAL','ELEVATED','HIGH','CRITICAL'][c.threat]||'NOMINAL'}`;
+    el.onclick=()=>{ $('mapCitySel').value=c.name; $('mapThreat').value=c.threat; $('mapCaseRef').value=''; blip(); };
+    wrap.appendChild(el);
+  });
+  // summary
+  const counts={0:0,1:0,2:0,3:0,awe:0};
+  state.cities.forEach(c=>{ counts[c.threat]=(counts[c.threat]||0)+1; });
+  $('threatSummary').innerHTML=
+    `<div>NOMINAL: <b style="color:#00ff66">${counts[0]||0}</b></div>`+
+    `<div>ELEVATED: <b style="color:#ffcc00">${counts[1]||0}</b></div>`+
+    `<div>HIGH: <b style="color:#ff8800">${counts[2]||0}</b></div>`+
+    `<div>CRITICAL: <b style="color:#ff4444">${counts[3]||0}</b></div>`+
+    `<div>AWE: <b style="color:#3399ff">${counts.awe||0}</b></div>`+
+    `<div style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px">ACTIVE CASES: <b style="color:var(--theme)">${state.incidents.filter(i=>i.status!=='RESOLVED').length}</b></div>`;
+  setHum(true);
+}
+function fillCitySelects(){
+  const opts=state.cities.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+  ['mapCitySel','siteCity','incCity'].forEach(id=>{ $(id).innerHTML=opts; });
+  ['teamVehicle'].forEach(id=>{ $(id).innerHTML=state.vehicles.map(v=>`<option>${esc(v.reg)}</option>`).join(''); });
+}
+
+/* ---------- TABLES ---------- */
+function renderCities(){
+  $('cityTable').querySelector('tbody').innerHTML=state.cities.map(c=>
+    `<tr><td>${esc(c.name)}</td><td>${esc(c.region)}</td><td>${threatBadge(c.threat)}</td></tr>`).join('');
+}
+function renderSites(){
+  $('siteTable').querySelector('tbody').innerHTML=state.sites.map((s,i)=>
+    `<tr><td>${esc(s.name)}</td><td>${esc(s.city)}</td><td>${esc(s.status)}</td><td><button class="btn small danger" onclick="removeSite(${i})">DEL</button></td></tr>`).join('');
+}
+function renderTeams(){
+  $('teamTable').querySelector('tbody').innerHTML=state.teams.map(t=>
+    `<tr><td>${esc(t.name)}</td><td>${esc(t.lead)}</td><td>${esc(t.vehicle)}</td><td>${esc(t.status)}</td></tr>`).join('');
+}
+function renderVehicles(){
+  $('vehicleTable').querySelector('tbody').innerHTML=state.vehicles.map(v=>
+    `<tr><td>${esc(v.reg)}</td><td>${esc(v.type)}</td><td>${esc(v.status)}</td></tr>`).join('');
+}
+function renderSpectres(){
+  $('spectreTable').querySelector('tbody').innerHTML=state.spectres.map(s=>
+    `<tr><td>${esc(s.cls)}</td><td>${esc(s.name)}</td><td>${threatBadge(s.threat)}</td></tr>`).join('');
+}
+function renderIncidents(){
+  $('incidentTable').querySelector('tbody').innerHTML=state.incidents.map(i=>
+    `<tr><td>${esc(i.ref)}</td><td>${esc(i.city)}</td><td>${threatBadge(i.threat)}</td><td>${esc(i.status)}</td></tr>`).join('');
+}
+function renderAll(){
+  renderMap(); renderCities(); renderSites(); renderTeams();
+  renderVehicles(); renderSpectres(); renderIncidents();
+  fillCitySelects(); renderEditor(); renderPreflight(); renderDiag();
+  renderContain(); renderChat(); renderLoadingArt();
+  $('opName').textContent = state.operator;
+}
+
+/* ---------- TEAM EDITOR ---------- */
+function renderEditor(){
+  const sel=$('editTeamSel');
+  const cur=sel.value;
+  sel.innerHTML=state.teams.map(t=>`<option>${esc(t.name)}</option>`).join('');
+  if(cur && state.teams.some(t=>t.name===cur)) sel.value=cur;
+  const team=state.teams.find(t=>t.name===sel.value);
+  $('memberTable').querySelector('tbody').innerHTML = team ? team.members.map((m,i)=>
+    `<tr><td>${esc(m.name)}</td><td>${esc(m.role)}</td><td><button class="btn small danger" onclick="removeMember('${esc(team.name)}',${i})">X</button></td></tr>`).join('') : '<tr><td colspan="3">NO TEAMS</td></tr>';
+}
+
+/* ---------- PRE-FLIGHT ---------- */
+function renderPreflight(){
+  $('preflightList').innerHTML = state.preflight.map((p,i)=>
+    `<div style="padding:6px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px">
+      <span>${esc(p.name)}</span><span style="color:${p.ok?'var(--theme)':'var(--danger)'}">${p.ok?'PASS':'FAIL'}</span>
+    </div>`).join('');
+  $('preflightMeters').innerHTML = state.preflight.map((p,i)=>
+    `<div class="meter"><div class="cap">${esc(p.name)}</div><div class="bar"><i style="width:${p.ok?100:15}%"></i></div></div>`).join('');
+}
+
+/* ---------- DIAGNOSTICS ---------- */
+function renderDiag(){
+  $('diagList').innerHTML = state.diag.map(d=>
+    `<div style="padding:6px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px">
+      <span>${esc(d.name)}</span><span style="color:var(--theme)">${esc(d.status)}</span>
+    </div>`).join('');
+}
+function diagLog(msg,cls){
+  const l=$('diagLog');
+  l.innerHTML += `<div class="${cls||''}">[${nowStr()}] ${esc(msg)}</div>`;
+  l.scrollTop=l.scrollHeight;
+}
+
+/* ---------- CONTAINMENT ---------- */
+function renderContain(){
+  const g=$('containGrid');
+  g.innerHTML=state.contain.map(c=>{
+    const colors=['#00ff66','#ffcc00','#ff8800','#ff4444'];
+    return `<div style="aspect-ratio:1;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;background:${colors[c.status]}22;cursor:pointer" onclick="cycleCell(${c.id-1})">
+      <div style="font-size:20px;color:${colors[c.status]}">${c.status===3?'⚠':'▣'}</div>
+      <div style="font-size:9px;color:var(--muted)">CELL ${c.id}</div>
+    </div>`;
+  }).join('');
+  const active=state.contain.filter(c=>c.status>0).length;
+  $('containInfo').innerHTML=
+    `<div>CELLS: <b>${state.contain.length}</b></div>`+
+    `<div>OCCUPIED: <b style="color:var(--warn)">${active}</b></div>`+
+    `<div>GRID LOAD: <b style="color:var(--theme)">${Math.round(active/state.contain.length*100)}%</b></div>`+
+    `<div style="margin-top:8px;font-size:10px;color:var(--muted)">CLICK A CELL TO CYCLE ITS STATUS.</div>`;
+}
+
+/* ---------- CHAT ---------- */
+function renderChat(){
+  const log=$('chatLog');
+  log.innerHTML=state.chat.map(m=>{
+    if(m.sys) return `<div class="chat-msg sys">— ${esc(m.text)} —</div>`;
+    return `<div class="chat-msg ${m.sent?'sent':''}"><span class="who">${esc(m.who)}</span> <span class="time">[${esc(m.time)}]</span><br>${esc(m.text)}</div>`;
+  }).join('');
+  log.scrollTop=log.scrollHeight;
+}
+
+/* ---------- LOADING ART ---------- */
+function renderLoadingArt(){
+  $('loadingArt').src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(BOOT_ART_SVG)));
+}
+
+/* ---------- BOOT SEQUENCE ---------- */
+function runBoot(){
+  const log=$('bootLog'), fill=$('bootFill');
+  const lines=[
+    'ECTO-OS BIOS v2.1 ...',
+    'INITIALIZING FIELD OPERATIONS MODULE ...',
+    'LOADING DISPATCH MAP ...',
+    'CALIBRATING PKE SENSORS ...',
+    'LINKING CONTAINMENT GRID ...',
+    'ESTABLISHING COMMS CHANNEL ...',
+    'ALL SYSTEMS NOMINAL.',
+    'AWAITING OPERATOR AUTHORIZATION ...'
+  ];
+  let i=0, p=0;
+  const step=()=>{
+    if(i<lines.length){
+      log.textContent += lines[i]+'\n';
+      p=Math.min(100,Math.round((i+1)/lines.length*100));
+      fill.style.width=p+'%';
+      i++;
+      setTimeout(step, 220+Math.random()*180);
+    } else {
+      setTimeout(()=>{ $('boot').style.display='none'; $('login').style.display='flex'; }, 400);
+    }
+  };
+  step();
+}
+
+/* ---------- LOGIN ---------- */
+function doLogin(){
+  const u=$('loginUser').value.trim().toUpperCase()||'OPERATOR';
+  const p=$('loginPass').value.trim();
+  if(p && p!=='ecto1984'){ toast('ACCESS DENIED'); return; }
+  state.operator=u;
+  $('login').style.display='none';
+  $('app').style.display='block';
+  initAudio(); setHum(true); blip();
+  diagLog('OPERATOR '+u+' LOGGED IN.','ok');
+  renderAll();
+  save();
+}
+
+/* ---------- EXPORT / IMPORT ---------- */
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='ecto-os-state-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('EXPORT COMPLETE');
+}
+function importJSON(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const s=JSON.parse(e.target.result);
+      if(!s.cities || !s.teams) throw new Error('bad');
+      state=Object.assign(state,s);
+      save(); renderAll(); applyTheme();
+      toast('IMPORT SUCCESSFUL');
+    }catch(err){ toast('IMPORT FAILED: INVALID FILE'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ---------- GLOBAL FUNCTIONS (inline onclick) ---------- */
+window.removeSite=function(i){ state.sites.splice(i,1); renderSites(); save(); };
+window.removeMember=function(team,i){ const t=state.teams.find(x=>x.name===team); if(t){t.members.splice(i,1);} renderEditor(); save(); };
+window.cycleCell=function(i){ state.contain[i].status=(state.contain[i].status+1)%4; renderContain(); blip(); save(); };
+
+/* ---------- WIRE UP ---------- */
+document.addEventListener('DOMContentLoaded',()=>{
+  load(); applyTheme(); buildNav();
+  renderLoadingArt(); renderAll();
+
+  // boot art
+  $('bootArt').src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(BOOT_ART_SVG)));
+
+  // login
+  $('loginBtn').onclick=doLogin;
+  $('loginPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+
+  // dispatch map
+  $('mapApply').onclick=()=>{
+    const city=$('mapCitySel').value;
+    const c=state.cities.find(x=>x.name===city);
+    if(!c){ toast('SELECT A CITY'); return; }
+    c.threat=$('mapThreat').value;
+    const ref=$('mapCaseRef').value.trim();
+    if(ref){ state.incidents.push({ref:ref, city:city, threat:c.threat, status:'OPEN'}); }
+    renderMap(); renderCities(); renderIncidents(); save();
+    setHum(true); toast('MAP UPDATED');
+  };
+  $('mapClear').onclick=()=>{
+    const c=state.cities.find(x=>x.name===$('mapCitySel').value);
+    if(c){ c.threat=0; renderMap(); renderCities(); save(); toast('CASE CLEARED'); }
+  };
+
+  // cities
+  $('cityAdd').onclick=()=>{
+    const name=$('cityName').value.trim().toUpperCase();
+    if(!name){ toast('ENTER CITY NAME'); return; }
+    state.cities.push({name, region:$('cityRegion').value.trim().toUpperCase()||'N/A', x:+$('cityX').value||50, y:+$('cityY').value||50, threat:0});
+    $('cityName').value=''; $('cityRegion').value='';
+    renderMap(); renderCities(); fillCitySelects(); save(); toast('CITY REGISTERED');
+  };
+
+  // sites
+  $('siteAdd').onclick=()=>{
+    const name=$('siteName').value.trim().toUpperCase();
+    if(!name){ toast('ENTER SITE NAME'); return; }
+    state.sites.push({name, city:$('siteCity').value, status:$('siteStatus').value});
+    $('siteName').value='';
+    renderSites(); save(); toast('SITE REGISTERED');
+  };
+
+  // teams
+  $('teamAdd').onclick=()=>{
+    const name=$('teamName').value.trim().toUpperCase();
+    if(!name){ toast('ENTER TEAM NAME'); return; }
+    state.teams.push({name, lead:$('teamLead').value.trim().toUpperCase()||'UNASSIGNED', vehicle:$('teamVehicle').value, status:$('teamStatus').value, members:[]});
+    $('teamName').value=''; $('teamLead').value='';
+    renderTeams(); renderEditor(); save(); toast('TEAM FORMED');
+  };
+
+  // vehicles
+  $('vehAdd').onclick=()=>{
+    const reg=$('vehReg').value.trim().toUpperCase();
+    if(!reg){ toast('ENTER REGISTRATION'); return; }
+    state.vehicles.push({reg, type:$('vehType').value, status:$('vehStatus').value});
+    $('vehReg').value='';
+    renderVehicles(); fillCitySelects(); save(); toast('VEHICLE REGISTERED');
+  };
+
+  // editor
+  $('editTeamSel').onchange=renderEditor;
+  $('memberAdd').onclick=()=>{
+    const team=state.teams.find(t=>t.name===$('editTeamSel').value);
+    const name=$('memberName').value.trim().toUpperCase();
+    if(!team || !name){ toast('SELECT TEAM AND ENTER NAME'); return; }
+    team.members.push({name, role:$('memberRole').value.trim().toUpperCase()||'FIELD TECH'});
+    $('memberName').value=''; $('memberRole').value='';
+    renderEditor(); save(); toast('MEMBER ADDED');
+  };
+
+  // preflight
+  $('preflightRun').onclick=()=>{
+    state.preflight.forEach(p=>{ p.ok=Math.random()>.15; });
+    renderPreflight();
+    const ok=state.preflight.filter(p=>p.ok).length;
+    toast('PRE-FLIGHT: '+ok+'/'+state.preflight.length+' PASS');
+    blip();
+    if(ok===state.preflight.length) setHum(true);
+    save();
+  };
+  $('preflightReset').onclick=()=>{
+    state.preflight.forEach(p=>p.ok=true);
+    renderPreflight(); toast('ALL SYSTEMS NOMINAL'); save();
+  };
+
+  // diagnostics
+  $('diagRun').onclick=()=>{
+    diagLog('RUNNING FULL DIAGNOSTICS...','warn');
+    state.diag.forEach((d,i)=>{
+      setTimeout(()=>{
+        d.status='OK';
+        renderDiag();
+        diagLog(d.name+': OK','ok');
+      }, 300+i*250);
+    });
+    setTimeout(()=>{ diagLog('DIAGNOSTICS COMPLETE. ALL SYSTEMS NOMINAL.','ok'); toast('DIAGNOSTICS COMPLETE'); }, 300+state.diag.length*250+200);
+    save();
+  };
+
+  // spectres
+  $('specAdd').onclick=()=>{
+    const name=$('specName').value.trim().toUpperCase();
+    if(!name){ toast('ENTER DESIGNATION'); return; }
+    state.spectres.push({cls:$('specClass').value.trim().toUpperCase()||'CLASS UNKNOWN', name, threat:+$('specThreat').value});
+    $('specName').value=''; $('specClass').value='';
+    renderSpectres(); save(); toast('SPECTRE LOG');
+  };
+
+  // incidents
+  $('incAdd').onclick=()=>{
+    const ref=$('incRef').value.trim().toUpperCase();
+    if(!ref){ toast('ENTER CASE REF'); return; }
+    state.incidents.push({ref, city:$('incCity').value, threat:$('incThreat').value, status:$('incStatus').value});
+    $('incRef').value='';
+    renderIncidents(); renderMap(); save(); toast('INCIDENT FILED');
+  };
+
+  // containment
+  $('containCycle').onclick=()=>{
+    const i=Math.floor(Math.random()*state.contain.length);
+    state.contain[i].status=(state.contain[i].status+1)%4;
+    renderContain(); blip(); save();
+  };
+  $('containReset').onclick=()=>{
+    state.contain.forEach(c=>c.status=0);
+    renderContain(); toast('GRID RESET'); save();
+  };
+
+  // chat
+  $('chatSend').onclick=sendChat;
+  $('chatText').addEventListener('keydown',e=>{ if(e.key==='Enter') sendChat(); });
+  function sendChat(){
+    const text=$('chatText').value.trim();
+    if(!text){ return; }
+    state.chat.push({who:state.operator, text, time:nowStr(), sent:true});
+    $('chatText').value='';
+    renderChat(); blip(); save();
+    // simulated acknowledgment
+    setTimeout(()=>{
+      state.chat.push({who:'SYS', text:'ORDER RECEIVED BY ALL TEAMS. ACKNOWLEDGED.', time:null, sys:true});
+      renderChat(); save();
+    }, 800);
+  }
+  $('chatClear').onclick=()=>{
+    state.chat=[{who:'SYS', text:'COMMS CHANNEL RESET.', time:null, sys:true}];
+    renderChat(); save(); toast('CHANNEL CLEARED');
+  };
+
+  // sounds
+  $('humVol').oninput=e=>{ state.settings.humVol=+e.target.value; if(humGain) humGain.gain.setTargetAtTime(state.settings.humVol,audioCtx.currentTime,.1); save(); };
+  $('blipToggle').onchange=e=>{ state.settings.blip=e.target.value==='1'; save(); };
+  $('scanMode').onchange=e=>{ state.settings.scanMode=e.target.value; setHum(true); save(); };
+  $('soundTest').onclick=()=>{ initAudio(); setHum(true); blip(); toast('AUDIO ENGAGED'); };
+  $('soundStop').onclick=()=>{ setHum(false); clearInterval(heartTimer); toast('AUDIO SILENCED'); };
+
+  // theme selector in topbar (add via JS)
+  const status=$('topbar').querySelector('.status');
+  const themeSel=document.createElement('select');
+  themeSel.style.cssText='margin-top:6px;font-size:10px;padding:4px';
+  themeSel.innerHTML=THEMES.map(t=>`<option value="${t.id}" ${state.settings.theme===t.id?'selected':''}>${t.label}</option>`).join('');
+  themeSel.onchange=e=>{ state.settings.theme=e.target.value; applyTheme(); save(); blip(); };
+  status.appendChild(themeSel);
+
+  // export/import buttons in topbar
+  const expBtn=document.createElement('button');
+  expBtn.className='btn small ghost'; expBtn.textContent='EXPORT'; expBtn.style.cssText='margin:4px 4px 0 0';
+  expBtn.onclick=exportJSON;
+  const impLabel=document.createElement('label');
+  impLabel.className='btn small ghost'; impLabel.textContent='IMPORT'; impLabel.style.cssText='margin-top:4px;cursor:pointer';
+  const impInput=document.createElement('input');
+  impInput.type='file'; impInput.accept='.json'; impInput.style.display='none';
+  impInput.onchange=e=>{ if(e.target.files[0]) importJSON(e.target.files[0]); e.target.value=''; };
+  impLabel.appendChild(impInput);
+  status.appendChild(expBtn); status.appendChild(impLabel);
+
+  // clock
+  setInterval(()=>{
+    $('clock').textContent=new Date().toLocaleTimeString('en-GB');
+  },1000);
+
+  // start boot
+  runBoot();
 });
-render();
-saveState();
-})();
 </script>
 </body>
 </html>
