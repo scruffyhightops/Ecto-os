@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#151006">
+<title>ECTO OS</title>
+<style>
+:root{
+  --bg:#090806;--panel:#171208;--panel2:#21180b;--line:#7c5a21;
+  --amber:#ffb52e;--amber2:#ffd36a;--dim:#9d7b3c;--green:#72d66b;
+  --red:#ff5a38;--blue:#4ca7ff;--yellow:#e8d34d;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% 0,#2a1c08 0,#0a0805 55%,#050403 100%);color:var(--amber);min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.08;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 4px)}
+button,input{font:inherit}
+.app{max-width:1100px;margin:auto;padding:18px}
+header{border:1px solid var(--line);background:rgba(20,14,7,.94);padding:18px 20px;margin-bottom:14px;box-shadow:0 0 0 1px #241a0c inset}
+.brand{font-size:clamp(25px,5vw,42px);letter-spacing:.08em}
+.sub{color:var(--dim);font-size:12px;margin-top:5px}
+.status{margin-top:13px;color:var(--green);font-size:12px}
+.screen{border:1px solid var(--line);background:rgba(17,12,6,.96);padding:18px;min-height:520px}
+h1,h2{margin:0 0 16px;letter-spacing:.06em}
+h1{font-size:22px}h2{font-size:15px;color:var(--amber2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.btn{min-height:68px;border:1px solid var(--line);background:linear-gradient(#241909,#130e07);color:var(--amber);padding:14px;text-align:left;cursor:pointer}
+.btn:hover,.btn:focus{outline:1px solid var(--amber);background:#2b1d0a}
+.btn .label{font-size:15px;letter-spacing:.04em}.btn .desc{display:block;color:var(--dim);font-size:11px;margin-top:7px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.small{min-height:44px;padding:10px 14px}
+.panel{border:1px solid #4f3918;padding:15px;background:#120d06;margin:12px 0}
+.kv{display:grid;grid-template-columns:180px 1fr;gap:7px;font-size:12px}.kv b{color:var(--dim)}
+input{width:100%;background:#080604;border:1px solid var(--line);color:var(--amber);padding:12px;min-height:44px}
+label{display:block;color:var(--dim);font-size:11px;margin:10px 0 6px}
+.notice{border-left:3px solid var(--amber);padding:10px 12px;background:#21170a;color:var(--amber2);font-size:12px}
+.danger{color:var(--red)}.ok{color:var(--green)}
+footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--dim);font-size:10px;padding:12px 2px}
+.lock{max-width:420px;margin:55px auto}
+.hidden{display:none!important}
+.back{margin-bottom:14px}
+.map{position:relative;height:420px;border:1px solid #4f3918;background:
+linear-gradient(rgba(255,181,46,.06) 1px,transparent 1px),
+linear-gradient(90deg,rgba(255,181,46,.06) 1px,transparent 1px),
+#0b0a08;background-size:32px 32px;overflow:hidden}
+.uk{position:absolute;inset:8% 25% 8% 25%;border:1px solid #7c5a21;clip-path:polygon(38% 0,63% 5%,75% 18%,68% 32%,86% 48%,72% 63%,78% 80%,56% 100%,38% 91%,26% 74%,5% 65%,17% 48%,9% 28%,28% 18%);background:rgba(255,181,46,.035)}
+.marker{position:absolute;transform:translate(-50%,-50%);width:32px;height:32px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 14px currentColor;animation:pulse 1.8s infinite}
+.marker span{position:absolute;top:34px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;color:var(--amber2)}
+@keyframes pulse{50%{box-shadow:0 0 3px currentColor}}
+@media(max-width:600px){.app{padding:10px}.screen{min-height:600px}.kv{grid-template-columns:1fr}.map{height:360px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">ECTO OS</div>
+  <div class="sub">FIELD OPERATIONS SYSTEM // FOUNDATION BUILD</div>
+  <div class="status" id="systemStatus">SYSTEM // OPERATIONAL</div>
+</header>
+<main id="screen" class="screen"></main>
+<footer><span>ECTO OS // LOCAL DATABASE</span><span id="saveStatus">DATABASE // READY</span></footer>
+</div>
+<script>
+(() => {
+"use strict";
+
+const STORAGE_KEY = "ecto-os-foundation-v1";
+const ADMIN_KEY = "ecto-os-admin-v1";
+const DEFAULT_PASS = "ECTO-ADMIN-1984";
+
+const defaults = {
+  version: 1,
+  locations: [
+    {id:"LON-01", city:"London", severity:"green", lat:51.5074, lon:-0.1278, sites:[]},
+    {id:"POR-01", city:"Portsmouth", severity:"yellow", lat:50.8198, lon:-1.0880, sites:[]},
+    {id:"BHM-01", city:"Birmingham", severity:"green", lat:52.4862, lon:-1.8904, sites:[]},
+    {id:"MAN-01", city:"Manchester", severity:"orange", lat:53.4808, lon:-2.2426, sites:[]}
+  ],
+  teams: [],
+  vehicles: [],
+  spectres: [],
+  incidents: [],
+  awe: []
+};
+
+let state = loadState();
+let current = "home";
+let adminUnlocked = false;
+
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw) return {...clone(defaults),...JSON.parse(raw)};
+  }catch(e){}
+  return clone(defaults);
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  document.getElementById("saveStatus").textContent="DATABASE // SAVED "+new Date().toLocaleTimeString();
+}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function screen(html){document.getElementById("screen").innerHTML=html}
+function nav(name){current=name; render()}
+function adminGate(next){
+  if(adminUnlocked){nav(next);return}
+  current="lock"; render();
+}
+function render(){
+  if(current==="home") return home();
+  if(current==="response") return responseMap();
+  if(current==="config") return config();
+  if(current==="locations") return locations();
+  if(current==="teams") return teams();
+  if(current==="vehicles") return vehicles();
+  if(current==="data") return dataManagement();
+  if(current==="lock") return lockScreen();
+  if(current==="placeholder") return placeholder();
+  home();
+}
+function home(){
+screen(`<h1>MAIN MENU</h1>
+<div class="grid">
+${menuBtn("RESPONSE MAP","Live operational city response overview","response")}
+${menuBtn("ECTO DISPATCH","Response deployment and investigation workflow","placeholder")}
+${menuBtn("SPECTRE DATABASE","Spectre records and CDI classification","placeholder")}
+${menuBtn("INCIDENT LOG","Investigation and AWE records","placeholder")}
+${menuBtn("CONTAINMENT GRID","Grid analysis and field simulation","placeholder")}
+${menuBtn("DIAGNOSTICS","System and equipment diagnostics","placeholder")}
+${menuBtn("CONFIGURATION","Administrator system configuration","config",true)}
+</div>
+<div class="panel"><div class="kv">
+<b>SYSTEM STATUS</b><span class="ok">OPERATIONAL</span>
+<b>DATABASE</b><span>LOCAL // PERSISTENT</span>
+<b>LOCATIONS</b><span>${state.locations.length}</span>
+<b>RESPONSE TEAMS</b><span>${state.teams.length}</span>
+<b>VEHICLES</b><span>${state.vehicles.length}</span>
+</div></div>`)
+}
+function menuBtn(label,desc,target,protectedItem=false){
+return `<button class="btn" data-nav="${target}" ${protectedItem?'data-protected="1"':''}><span class="label">${label}</span><span class="desc">${desc}${protectedItem?' // ADMIN':''}</span></button>`
+}
+function responseMap(){
+let marks=state.locations.map((l,i)=>{
+let x=25+((l.lon+8)/14)*50; let y=12+((56-l.lat)/7)*76;
+x=Math.max(8,Math.min(92,x));y=Math.max(8,Math.min(92,y));
+return `<button class="marker" style="left:${x}%;top:${y}%;color:var(--${l.severity==='green'?'green':l.severity==='yellow'?'yellow':l.severity==='orange'?'amber':l.severity==='red'?'red':'blue'})" data-location="${escapeHtml(l.id)}" title="${escapeHtml(l.city)}"><span>${escapeHtml(l.city)}</span></button>`
+}).join("");
+screen(`<button class="btn small back" data-nav="home">← MAIN MENU</button>
+<h1>RESPONSE MAP</h1>
+<div class="notice">Operational response overview. Select a city reticle to inspect its investigation locations.</div>
+<div class="map"><div class="uk"></div>${marks}</div>
+<div class="panel"><h2>RETICLE STATUS</h2>
+<div class="kv"><b>GREEN</b><span>Routine</span><b>YELLOW</b><span>Elevated</span><b>ORANGE</b><span>Serious</span><b>RED</b><span>Critical</span><b>BLUE</b><span>Altered World Event</span></div></div>`)
+}
+function config(){
+screen(`<button class="btn small back" data-nav="home">← MAIN MENU</button>
+<h1>CONFIGURATION</h1>
+<div class="grid">
+${menuBtn("LOCATION MANAGEMENT","Cities and investigation locations","locations")}
+${menuBtn("RESPONSE TEAM MANAGEMENT","Teams, members and assigned vehicles","teams")}
+${menuBtn("VEHICLE FLEET","Master vehicle records","vehicles")}
+${menuBtn("DATA MANAGEMENT","Protected import and export","data")}
+</div>
+<div class="panel"><div class="notice">Administrator access active. Configuration changes are written to the local database automatically.</div></div>`)
+}
+function locations(){
+screen(`<button class="btn small back" data-nav="config">← CONFIGURATION</button><h1>LOCATION MANAGEMENT</h1>
+<div class="panel"><h2>CITIES</h2>${state.locations.map(l=>`<div class="row"><button class="btn small" data-edit-location="${l.id}">${escapeHtml(l.city)} // ${l.id}</button></div>`).join("")||"No locations."}</div>
+<div class="panel"><h2>ADD CITY</h2><label>City name</label><input id="newCity" placeholder="City name"><div class="row"><button class="btn small" data-add-city="1">ADD LOCATION</button></div></div>`)
+}
+function teams(){
+screen(`<button class="btn small back" data-nav="config">← CONFIGURATION</button><h1>RESPONSE TEAM MANAGEMENT</h1>
+<div class="panel"><h2>TEAMS</h2>${state.teams.map(t=>`<div class="row"><button class="btn small" data-edit-team="${t.id}">${escapeHtml(t.name)} // ${escapeHtml(t.vehicleId||"NO VEHICLE")}</button></div>`).join("")||"No response teams."}</div>
+<div class="panel"><h2>ADD TEAM</h2><label>Team name</label><input id="newTeam" placeholder="Team Alpha"><div class="row"><button class="btn small" data-add-team="1">ADD TEAM</button></div></div>`)
+}
+function vehicles(){
+screen(`<button class="btn small back" data-nav="config">← CONFIGURATION</button><h1>VEHICLE FLEET</h1>
+<div class="panel"><h2>MASTER VEHICLE RECORDS</h2>${state.vehicles.map(v=>`<div class="row"><button class="btn small" data-edit-vehicle="${v.id}">${escapeHtml(v.designation)} // ${escapeHtml(v.role)}</button></div>`).join("")||"No vehicles."}</div>
+<div class="panel"><h2>ADD VEHICLE</h2><label>Designation</label><input id="newVehicle" placeholder="ECTO 19"><label>Role</label><input id="newRole" placeholder="Mobile containment"><div class="row"><button class="btn small" data-add-vehicle="1">ADD VEHICLE</button></div></div>`)
+}
+function dataManagement(){
+screen(`<button class="btn small back" data-nav="config">← CONFIGURATION</button><h1>DATA MANAGEMENT</h1>
+<div class="notice">IMPORT AND EXPORT ARE ADMINISTRATOR PROTECTED.</div>
+<div class="grid" style="margin-top:15px">
+<button class="btn" data-export="1"><span class="label">EXPORT ECTO DATA</span><span class="desc">Create a complete local database backup</span></button>
+<button class="btn" data-import="1"><span class="label">IMPORT ECTO DATA</span><span class="desc">Restore a previously exported database</span></button>
+</div>
+<div class="panel"><div class="kv"><b>DATABASE</b><span>ECTO OS LOCAL DATABASE v${state.version}</span><b>LAST SAVE</b><span>${new Date().toLocaleString()}</span></div></div>`)
+}
+function lockScreen(){
+screen(`<div class="lock"><h1>ADMINISTRATOR ACCESS</h1>
+<div class="notice">Configuration and data management are protected.</div>
+<label>ADMIN PASSCODE</label><input id="adminPass" type="password" autocomplete="current-password" placeholder="Enter passcode">
+<div class="row"><button class="btn small" data-unlock="1">UNLOCK SYSTEM</button><button class="btn small" data-nav="home">CANCEL</button></div>
+<div id="lockMsg" class="danger"></div></div>`)
+}
+function placeholder(){
+screen(`<button class="btn small back" data-nav="home">← MAIN MENU</button><h1>SYSTEM MODULE</h1>
+<div class="panel"><div class="notice">MODULE NOT YET INITIALISED</div><p style="color:var(--dim)">This foundation build reserves the module and navigation point. Operational functionality will be added without changing the core database architecture.</p></div>`)
+}
+
+document.addEventListener("click",e=>{
+const b=e.target.closest("button"); if(!b)return;
+if(b.dataset.nav){
+  if(b.dataset.protected) adminGate(b.dataset.nav); else nav(b.dataset.nav); return;
+}
+if(b.dataset.location){alert("Investigation Location file for "+b.dataset.location+" will be connected here.");return}
+if(b.dataset.unlock){
+ const p=document.getElementById("adminPass").value;
+ const saved=localStorage.getItem(ADMIN_KEY);
+ if(p && (p===saved || (!saved && p===DEFAULT_PASS))){
+   if(!saved) localStorage.setItem(ADMIN_KEY,p);
+   adminUnlocked=true; nav("config");
+ } else document.getElementById("lockMsg").textContent="ACCESS DENIED // INVALID PASSCODE";
+ return;
+}
+if(b.dataset.addCity){
+ const v=document.getElementById("newCity").value.trim(); if(!v)return;
+ const id="LOC-"+Date.now(); state.locations.push({id,city:v,severity:"green",lat:51.5,lon:-1,sites:[]});saveState();render();return;
+}
+if(b.dataset.addTeam){
+ const v=document.getElementById("newTeam").value.trim(); if(!v)return;
+ state.teams.push({id:"TEAM-"+Date.now(),name:v,members:[],vehicleId:null});saveState();render();return;
+}
+if(b.dataset.addVehicle){
+ const d=document.getElementById("newVehicle").value.trim(),r=document.getElementById("newRole").value.trim(); if(!d)return;
+ state.vehicles.push({id:"VEH-"+Date.now(),designation:d,role:r||"Unassigned"});saveState();render();return;
+}
+if(b.dataset.editLocation){alert("Location editor reserved for the next foundation phase.");return}
+if(b.dataset.editTeam){alert("Team editor reserved for the next foundation phase.");return}
+if(b.dataset.editVehicle){alert("Vehicle editor reserved for the next foundation phase.");return}
+if(b.dataset.export){
+ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ecto-os-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);return;
+}
+if(b.dataset.import){
+ const input=document.createElement("input");input.type="file";input.accept=".json,application/json";
+ input.onchange=()=>{const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const incoming=JSON.parse(r.result);if(!incoming || incoming.version!==1)throw Error();state=incoming;saveState();alert("ECTO OS DATA IMPORTED");render()}catch(e){alert("IMPORT FAILED // INVALID ECTO DATA")}};r.readAsText(f)};input.click();return;
+}
+});
+render();
+saveState();
+})();
+</script>
+</body>
+</html>
