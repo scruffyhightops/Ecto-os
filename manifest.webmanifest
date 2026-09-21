@@ -1,0 +1,10 @@
+{
+  "name": "ECTO OS",
+  "short_name": "ECTO OS",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#090806",
+  "theme_color": "#090806",
+  "description": "ECTO OS Field Operations System",
+  "icons": []
+}
